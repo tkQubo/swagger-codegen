@@ -209,4 +209,17 @@ public class SwiftGenerator extends DefaultCodegen implements CodegenConfig {
     }
     return name;
   }
+
+  @Override
+  public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, Map<String, Model> definitions) {
+    List<Parameter> parameters = operation.getParameters();
+    parameters = Lists.newArrayList(Iterators.filter(parameters.iterator(), new Predicate<Parameter>() {
+      @Override
+      public boolean apply(@Nullable Parameter parameter) {
+        return !(parameter instanceof HeaderParameter);
+      }
+    }));
+    operation.setParameters(parameters);
+    return super.fromOperation(path, httpMethod, operation, definitions);
+  }
 }
