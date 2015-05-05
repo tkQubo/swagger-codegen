@@ -83,4 +83,21 @@ extension JSON {
     func decode<T: JSONDecodable>() -> [T]? {
         return self.arrayObject?.map(T.decode).filter({ $0 != nil }).map({ $0! })
     }
+    func decode<T>() -> [T]? {
+        return self.array?.map({ $0 as! T })
+    }
+    static let DateFormat: NSDateFormatter = {
+        let formatter = NSDateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+        return formatter
+    }()
+    func decode() -> NSDate? {
+        return JSON.DateFormat.dateFromString(self.string ?? "")
+    }
+    func decode() -> NSData? {
+        return self.rawData(options: .allZeros, error: nil)
+    }
+    func decode() -> NSData {
+        return self.decode()!
+    }
 }

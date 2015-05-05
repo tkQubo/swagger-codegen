@@ -9,16 +9,19 @@ import SwiftyJSON
 {{#description}}
 
 /** {{description}} */{{/description}}
-class {{classname}}: JSONEncodable, JSONDecoedable {
+final class {{classname}}: JSONEncodable, JSONDecodable {
 {{#vars}}{{#isEnum}}
     enum {{datatypeWithEnum}}: String { {{#allowableValues}}{{#values}}
         case {{enum}} = "{{raw}}"{{/values}}{{/allowableValues}}
     }
     {{/isEnum}}{{/vars}}
     {{#vars}}{{#isEnum}}{{#description}}/** {{description}} */
-    {{/description}}var {{name}}: {{{datatypeWithEnum}}}{{^required}}?{{/required}}{{#defaultValue}} = {{{defaultValue}}}{{/defaultValue}}{{/isEnum}}{{^isEnum}}{{#description}}/** {{description}} */
-    {{/description}}var {{name}}: {{{datatype}}}{{^required}}?{{/required}}{{#defaultValue}} = {{{defaultValue}}}{{/defaultValue}}{{/isEnum}}
+    {{/description}}var {{name}}: {{{datatypeWithEnum}}}{{^required}}?{{/required}}{{#required}}!{{/required}}{{#defaultValue}} = {{{defaultValue}}}{{/defaultValue}}{{/isEnum}}{{^isEnum}}{{#description}}/** {{description}} */
+    {{/description}}var {{name}}: {{{datatype}}}{{^required}}?{{/required}}{{#required}}!{{/required}}{{#defaultValue}} = {{{defaultValue}}}{{/defaultValue}}{{/isEnum}}
     {{/vars}}
+
+    init() {
+    }
 
     // MARK: JSONDecodable
     static func decode(source: AnyObject) -> {{classname}}? {
@@ -31,11 +34,11 @@ class {{classname}}: JSONEncodable, JSONDecoedable {
 
     // MARK: JSONEncodable
     func encode() -> Any {
-        var dictionary = [String:AnyObject](){{#vars}}{{#isNotContainer}}{{#isPrimitiveType}}{{^isEnum}}
+        var dictionary = [String:Any](){{#vars}}{{#isNotContainer}}{{#isPrimitiveType}}{{^isEnum}}
         dictionary["{{name}}"] = self.{{name}}{{/isEnum}}{{/isPrimitiveType}}{{#isEnum}}
-        dictionary["{{name}}"] = self.{{name}}.rawValue{{/isEnum}}{{^isPrimitiveType}}
-        dictionary["{{name}}"] = self.{{name}}.encode(){{/isPrimitiveType}}{{/isNotContainer}}{{#isContainer}}
-        dictionary["{{name}}"] = self.{{name}}.encode(){{/isContainer}}{{/vars}}
+        dictionary["{{name}}"] = self.{{name}}{{^required}}?{{/required}}.rawValue{{/isEnum}}{{^isPrimitiveType}}
+        dictionary["{{name}}"] = self.{{name}}{{^required}}?{{/required}}.encode(){{/isPrimitiveType}}{{/isNotContainer}}{{#isContainer}}
+        dictionary["{{name}}"] = self.{{name}}{{^required}}?{{/required}}.encode(){{/isContainer}}{{/vars}}
         return dictionary
     }
 }
