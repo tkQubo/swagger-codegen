@@ -1,11 +1,15 @@
 package com.wordnik.swagger.codegen.languages;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.wordnik.swagger.codegen.*;
+import com.wordnik.swagger.models.Model;
+import com.wordnik.swagger.models.Operation;
+import com.wordnik.swagger.models.parameters.HeaderParameter;
+import com.wordnik.swagger.models.parameters.Parameter;
 import com.wordnik.swagger.models.properties.*;
-import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
 
 import javax.annotation.Nullable;
@@ -46,6 +50,8 @@ public class SwiftGenerator extends DefaultCodegen implements CodegenConfig {
     sourceFolder = appName + "/" + sourceFolder;
 
     supportingFiles.add(new SupportingFile("Podfile.mustache", "", "Podfile"));
+    supportingFiles.add(new SupportingFile("SwaggerExtensions.mustache", sourceFolder + "/Extensions", "SwaggerExtensions.swift"));
+    supportingFiles.add(new SupportingFile("Response.mustache", sourceFolder + "/Models", "Response.swift"));
 
     languageSpecificPrimitives = new HashSet<String>(
       Arrays.asList(
