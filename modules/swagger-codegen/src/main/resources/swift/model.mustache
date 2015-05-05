@@ -39,7 +39,7 @@ final class {{classname}}: JSONEncodable, JSONDecodable {
         nullableDictionary["{{name}}"] = self.{{name}}{{^required}}?{{/required}}.rawValue{{/isEnum}}{{^isPrimitiveType}}
         nullableDictionary["{{name}}"] = self.{{name}}{{^required}}?{{/required}}.encode(){{/isPrimitiveType}}{{/isNotContainer}}{{#isContainer}}
         nullableDictionary["{{name}}"] = self.{{name}}{{^required}}?{{/required}}.encode(){{/isContainer}}{{/vars}}
-        return SwaggerHelper.rejectNil(nullableDictionary)
+        return APIHelper.rejectNil(nullableDictionary)
     }
 }
 {{/model}}

@@ -18,7 +18,7 @@ import java.io.File;
 
 public class SwiftGenerator extends DefaultCodegen implements CodegenConfig {
   public static final String NON_NAME_ELEMENT = "[-_:;#]";
-  protected String sourceFolder = "Classes";
+  protected String sourceFolder = "Classes/Swaggers";
 
   public CodegenType getTag() {
     return CodegenType.CLIENT;
@@ -38,8 +38,8 @@ public class SwiftGenerator extends DefaultCodegen implements CodegenConfig {
     modelTemplateFiles.put("model.mustache", ".swift");
     apiTemplateFiles.put("api.mustache", ".swift");
     templateDir = "swift";
-    apiPackage = "Apis";
-    modelPackage = "Models";
+    apiPackage = "/APIs";
+    modelPackage = "/Models";
 
     // from ObjcClientCodegen.java
     String appName = System.getProperty("appName");
@@ -49,9 +49,10 @@ public class SwiftGenerator extends DefaultCodegen implements CodegenConfig {
     additionalProperties.put("projectName", appName);
     sourceFolder = appName + "/" + sourceFolder;
 
-    supportingFiles.add(new SupportingFile("Podfile.mustache", "", "Podfile"));
-    supportingFiles.add(new SupportingFile("SwaggerExtensions.mustache", sourceFolder + "/Extensions", "SwaggerExtensions.swift"));
-    supportingFiles.add(new SupportingFile("Response.mustache", sourceFolder + "/Models", "Response.swift"));
+//    supportingFiles.add(new SupportingFile("Podfile.mustache", "", "Podfile"));
+    supportingFiles.add(new SupportingFile("APIHelper.mustache", sourceFolder, "APIHelper.swift"));
+    supportingFiles.add(new SupportingFile("Extensions.mustache", sourceFolder, "Extensions.swift"));
+    supportingFiles.add(new SupportingFile("Models.mustache", sourceFolder, "Models.swift"));
 
     languageSpecificPrimitives = new HashSet<String>(
       Arrays.asList(
@@ -114,12 +115,12 @@ public class SwiftGenerator extends DefaultCodegen implements CodegenConfig {
 
   @Override
   public String modelFileFolder() {
-    return outputFolder + "/" + sourceFolder + "/" + modelPackage().replace('.', File.separatorChar);
+    return outputFolder + "/" + sourceFolder + modelPackage().replace('.', File.separatorChar);
   }
 
   @Override
   public String apiFileFolder() {
-    return outputFolder + "/" + sourceFolder + "/" + apiPackage().replace('.', File.separatorChar);
+    return outputFolder + "/" + sourceFolder + apiPackage().replace('.', File.separatorChar);
   }
 
   @Override
