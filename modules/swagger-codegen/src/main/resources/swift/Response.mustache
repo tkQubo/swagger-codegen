@@ -4,6 +4,8 @@
 // https://github.com/swagger-api/swagger-codegen
 //
 
+import Foundation
+import SwiftyJSON
 
 protocol JSONDecodable {
     static func decode(source: AnyObject) -> Self?
@@ -39,5 +41,15 @@ class Response<T: JSONDecodable> {
     init(header: [NSObject: AnyObject], body: T) {
         self.header = header
         self.body = body
+    }
+}
+
+final class Empty: JSONDecodable {
+    private init() { }
+
+    static let instance = Empty()
+
+    static func decode(source: AnyObject) -> Empty? {
+        return instance
     }
 }
