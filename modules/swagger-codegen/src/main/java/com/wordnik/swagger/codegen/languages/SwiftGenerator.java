@@ -70,6 +70,7 @@ public class SwiftGenerator extends DefaultCodegen implements CodegenConfig {
         "Dictionary",
         "Set",
         "Any",
+        "Empty",
         "AnyObject")
     );
     reservedWords = new HashSet<String>(
