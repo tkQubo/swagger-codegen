@@ -35,10 +35,16 @@ class {{classname}} {
         path = path.stringByReplacingOccurrencesOfString("{{=<% %>=}}{<%paramName%>}<%={{ }}=%>", withString: "\({{paramName}})", options: .LiteralSearch, range: nil){{/pathParams}}
         let url = basePath + path
         {{#bodyParam}}
-        let parameters: [String:AnyObject] = {{paramName}}.encode(){{/bodyParam}}{{^bodyParam}}
-        let parameters: [String:AnyObject] = [{{#queryParams}}
-            "{{paramName}}": {{paramName}}{{#hasMore}},{{/hasMore}}{{/queryParams}}
+        let nulableParameters: [String:AnyObject?] = {{paramName}}.encode() as! [String:AnyObject]{{/bodyParam}}{{^bodyParam}}
+        let nulableParameters: [String:AnyObject?] = [{{#queryParams}}
+            "{{paramName}}": {{paramName}}{{#hasMore}},{{/hasMore}}{{/queryParams}}{{^queryParams}}:{{/queryParams}}
         ]{{/bodyParam}}
+        var parameters = [String:AnyObject]()
+        for (key, nullableValue) in nulableParameters {
+            if let value: AnyObject = nullableValue {
+                parameters[key] = value
+            }
+        }
 
         return Alamofire{{#bodyParam}}
             .request(.{{httpMethod}}, url, parameters: parameters, encoding: .JSON){{/bodyParam}}{{^bodyParam}}
