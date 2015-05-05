@@ -33,13 +33,13 @@ final class {{classname}}: JSONEncodable, JSONDecodable {
     }
 
     // MARK: JSONEncodable
-    func encode() -> Any {
-        var dictionary = [String:Any](){{#vars}}{{#isNotContainer}}{{#isPrimitiveType}}{{^isEnum}}
-        dictionary["{{name}}"] = self.{{name}}{{/isEnum}}{{/isPrimitiveType}}{{#isEnum}}
-        dictionary["{{name}}"] = self.{{name}}{{^required}}?{{/required}}.rawValue{{/isEnum}}{{^isPrimitiveType}}
-        dictionary["{{name}}"] = self.{{name}}{{^required}}?{{/required}}.encode(){{/isPrimitiveType}}{{/isNotContainer}}{{#isContainer}}
-        dictionary["{{name}}"] = self.{{name}}{{^required}}?{{/required}}.encode(){{/isContainer}}{{/vars}}
-        return dictionary
+    func encode() -> AnyObject {
+        var nullableDictionary = [String:AnyObject?](){{#vars}}{{#isNotContainer}}{{#isPrimitiveType}}{{^isEnum}}
+        nullableDictionary["{{name}}"] = self.{{name}}{{/isEnum}}{{/isPrimitiveType}}{{#isEnum}}
+        nullableDictionary["{{name}}"] = self.{{name}}{{^required}}?{{/required}}.rawValue{{/isEnum}}{{^isPrimitiveType}}
+        nullableDictionary["{{name}}"] = self.{{name}}{{^required}}?{{/required}}.encode(){{/isPrimitiveType}}{{/isNotContainer}}{{#isContainer}}
+        nullableDictionary["{{name}}"] = self.{{name}}{{^required}}?{{/required}}.encode(){{/isContainer}}{{/vars}}
+        return SwaggerHelper.rejectNil(nullableDictionary)
     }
 }
 {{/model}}

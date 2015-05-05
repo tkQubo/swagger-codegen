@@ -12,7 +12,7 @@ protocol JSONDecodable {
 }
 
 protocol JSONEncodable {
-    func encode() -> Any
+    func encode() -> AnyObject
 }
 
 final class RangedArray<Entity: JSONDecodable>: JSONDecodable {
@@ -35,12 +35,18 @@ final class RangedArray<Entity: JSONDecodable>: JSONDecodable {
 }
 
 class Response<T: JSONDecodable> {
+    let statusCode: Int
     let header: [NSObject: AnyObject]
     let body: T
 
-    init(header: [NSObject: AnyObject], body: T) {
+    init(statusCode: Int, header: [NSObject: AnyObject], body: T) {
+        self.statusCode = statusCode
         self.header = header
         self.body = body
+    }
+
+    convenience init(response: NSHTTPURLResponse, body: T) {
+        self.init(statusCode: response.statusCode, header: response.allHeaderFields, body: body)
     }
 }
 

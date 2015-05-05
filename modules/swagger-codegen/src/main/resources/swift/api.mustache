@@ -12,6 +12,7 @@ import PromiseKit
     /** {{description}} */{{/description}}
 class {{classname}} {
     let basePath = "{{basePath}}"
+    var credential: NSURLCredential?
 
 {{#operation}}
     /** {{#summary}}
@@ -35,21 +36,25 @@ class {{classname}} {
         path = path.stringByReplacingOccurrencesOfString("{{=<% %>=}}{<%paramName%>}<%={{ }}=%>", withString: "\({{paramName}})", options: .LiteralSearch, range: nil){{/pathParams}}
         let url = basePath + path
         {{#bodyParam}}
-        let nulableParameters: [String:AnyObject?] = {{paramName}}.encode() as! [String:AnyObject]{{/bodyParam}}{{^bodyParam}}
+        let parameters = {{paramName}}.encode() as! [String:AnyObject]{{/bodyParam}}{{^bodyParam}}
         let nulableParameters: [String:AnyObject?] = [{{#queryParams}}
             "{{paramName}}": {{paramName}}{{#hasMore}},{{/hasMore}}{{/queryParams}}{{^queryParams}}:{{/queryParams}}
-        ]{{/bodyParam}}
+        ]
         var parameters = [String:AnyObject]()
         for (key, nullableValue) in nulableParameters {
             if let value: AnyObject = nullableValue {
                 parameters[key] = value
             }
-        }
+        }{{/bodyParam}}
 
-        return Alamofire{{#bodyParam}}
+        let request = Alamofire{{#bodyParam}}
             .request(.{{httpMethod}}, url, parameters: parameters, encoding: .JSON){{/bodyParam}}{{^bodyParam}}
             .request(.{{httpMethod}}, url, parameters: parameters, encoding: .URL){{/bodyParam}}
-            .responsePromise()
+        if let credential = self.credential {
+            request.authenticate(usingCredential: credential)
+        }
+
+        return request.responsePromise()
     }
 
 {{/operation}}
