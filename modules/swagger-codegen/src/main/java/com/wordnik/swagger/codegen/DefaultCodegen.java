@@ -1,5 +1,7 @@
 package com.wordnik.swagger.codegen;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import com.wordnik.swagger.codegen.examples.ExampleGenerator;
 import com.wordnik.swagger.models.*;
 import com.wordnik.swagger.models.auth.ApiKeyAuthDefinition;
@@ -15,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.util.*;
 
@@ -24,6 +27,7 @@ import java.util.regex.Pattern;
 public class DefaultCodegen {
   Logger LOGGER = LoggerFactory.getLogger(DefaultCodegen.class);
 
+  protected String nonNameElementPattern = "[-_:;#]";
   protected String outputFolder = "";
   protected Set<String> defaultIncludes = new HashSet<String>();
   protected Map<String, String> typeMapping = new HashMap<String, String>();
@@ -152,6 +156,20 @@ public class DefaultCodegen {
 
   public String toOperationId(String operationId) { return operationId; }
 
+  public String nonNameElementToCamelCase(String name) {
+    name = StringUtils.join(Lists.transform(Lists.newArrayList(name.split(nonNameElementPattern)), new Function<String, String>() {
+      @Nullable
+      @Override
+      public String apply(String input) {
+        return StringUtils.capitalize(input);
+      }
+    }), "");
+    if (name.length() > 0) {
+      name = name.substring(0, 1).toLowerCase() + name.substring(1);
+    }
+    return name;
+  }
+
   public String toVarName(String name) {
     if(reservedWords.contains(name))
       return escapeReservedWord(name);
@@ -160,6 +178,7 @@ public class DefaultCodegen {
   }
 
   public String toParamName(String name) {
+    name = nonNameElementToCamelCase(name);
     if(reservedWords.contains(name)) {
       return escapeReservedWord(name);
     }
@@ -680,6 +699,7 @@ public class DefaultCodegen {
       operationId = builder.toString();
       LOGGER.warn("generated operationId " + operationId);
     }
+    operationId = nonNameElementToCamelCase(operationId);
     op.path = path;
     op.operationId = toOperationId(operationId);
     op.summary = escapeText(operation.getSummary());

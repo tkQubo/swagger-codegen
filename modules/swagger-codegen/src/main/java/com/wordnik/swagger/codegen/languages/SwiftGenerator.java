@@ -190,34 +190,10 @@ public class SwiftGenerator extends DefaultCodegen implements CodegenConfig {
   }
 
   @Override
-  public String toParamName(String name) {
-    return camel(super.toParamName(name));
-  }
-
-  @Override
-  public String toOperationId(String operationId) {
-    return camel(super.toOperationId(operationId));
-  }
-
-  @Override
   public String toApiName(String name) {
     if(name.length() == 0)
       return "DefaultAPI";
     return initialCaps(name) + "API";
-  }
-
-  protected static String camel(String name) {
-    name = StringUtils.join(Lists.transform(Lists.newArrayList(name.split(NON_NAME_ELEMENT)), new Function<String, String>() {
-      @Nullable
-      @Override
-      public String apply(String s) {
-        return StringUtils.capitalize(s);
-      }
-    }), "");
-    if (name.length() >= 1) {
-      name = name.substring(0, 1).toLowerCase() + name.substring(1);
-    }
-    return name;
   }
 
   @Override
