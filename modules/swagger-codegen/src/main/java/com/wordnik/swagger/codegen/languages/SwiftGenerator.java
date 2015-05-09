@@ -1,6 +1,5 @@
 package com.wordnik.swagger.codegen.languages;
 
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
@@ -53,6 +52,7 @@ public class SwiftGenerator extends DefaultCodegen implements CodegenConfig {
     supportingFiles.add(new SupportingFile("APIHelper.mustache", sourceFolder, "APIHelper.swift"));
     supportingFiles.add(new SupportingFile("Extensions.mustache", sourceFolder, "Extensions.swift"));
     supportingFiles.add(new SupportingFile("Models.mustache", sourceFolder, "Models.swift"));
+    supportingFiles.add(new SupportingFile("APIs.mustache", sourceFolder, "APIs.swift"));
 
     languageSpecificPrimitives = new HashSet<String>(
       Arrays.asList(
