@@ -30,16 +30,15 @@ extension {{projectName}}API {
 
          :returns: Promise<Response<{{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}Empty{{/returnType}}>> {{description}}
          */
-        func {{operationId}}({{#allParams}}{{paramName}}: {{dataType}}{{^required}}?{{/required}}{{#hasMore}}, {{/hasMore}}{{/allParams}}) -> RequestBuilder<{{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}Empty{{/returnType}}> {
-            var path = "{{path}}"{{#pathParams}}
+        func {{operationId}}({{#allParams}}{{^secondaryParam}}#{{/secondaryParam}}{{paramName}}: {{dataType}}{{^required}}?{{/required}}{{#hasMore}}, {{/hasMore}}{{/allParams}}) -> RequestBuilder<{{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}Empty{{/returnType}}> {
+            {{^pathParams}}let{{/pathParams}}{{#pathParams}}{{^secondaryParam}}var{{/secondaryParam}}{{/pathParams}} path = "{{path}}"{{#pathParams}}
             path = path.stringByReplacingOccurrencesOfString("{{=<% %>=}}{<%paramName%>}<%={{ }}=%>", withString: "\({{paramName}})", options: .LiteralSearch, range: nil){{/pathParams}}
             let url = {{projectName}}API.basePath + path
             {{#bodyParam}}
             let parameters = {{paramName}}.encode() as! [String:AnyObject]{{/bodyParam}}{{^bodyParam}}
-            let nillableParameters: [String:AnyObject?] = [{{#queryParams}}
-                "{{paramName}}": {{paramName}}{{#hasMore}},{{/hasMore}}{{/queryParams}}{{^queryParams}}
-                :{{/queryParams}}
-            ]
+            let nillableParameters: [String:AnyObject?] = {{^queryParams}}[:]{{/queryParams}}{{#queryParams}}{{^secondaryParam}}[{{/secondaryParam}}
+                "{{paramName}}": {{paramName}}{{#hasMore}},{{/hasMore}}{{^hasMore}}
+            ]{{/hasMore}}{{/queryParams}}
             var parameters = APIHelper.rejectNil(nillableParameters){{/bodyParam}}
 
             let request = Alamofire{{#bodyParam}}
