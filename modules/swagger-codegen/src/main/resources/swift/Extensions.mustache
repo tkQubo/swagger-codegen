@@ -16,6 +16,12 @@ extension Request {
                 defer.reject(error)
                 return
             }
+            if res!.statusCode >= 400 {
+                let error = NSError(domain: res!.URL!.URLString, code: res!.statusCode, userInfo: [:])
+                defer.reject(error)
+                return
+            }
+
             if Empty.instance is T {
                 let response = Response(response: res!, body: Empty.instance as! T)
                 defer.fulfill(response)

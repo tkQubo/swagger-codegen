@@ -5,10 +5,10 @@
 //
 
 class APIHelper {
-    static func rejectNil<Key: Hashable, Value>(source: [Key:Value?]) -> [Key:Value] {
-        var destination = [Key:Value]()
+    static func rejectNil(source: [String:AnyObject?]) -> [String:AnyObject] {
+        var destination = [String:AnyObject]()
         for (key, nillableValue) in source {
-            if let value = nillableValue {
+            if let value: AnyObject = nillableValue {
                 destination[key] = value
             }
         }

@@ -4,18 +4,74 @@
 // https://github.com/swagger-api/swagger-codegen
 //
 
+import Alamofire
+import PromiseKit
+
 class {{projectName}}API {
     static let basePath = "{{basePath}}"
     static var credential: NSURLCredential?
     class APIBase {
-        private(set) var credential: NSURLCredential?
-        func requireCredential() {
-            credential = OneteamAPI.credential
-        }
-        func revokeCredential() {
-            credential = nil
-        }
     }
 }
 
+class RequestBuilder<T: JSONDecodable> {
+    private var credential: NSURLCredential?
+    private var headers: [String:String] = [:]
+    private let request: Request
+    
+    internal init(request: Request) {
+        self.request = request
+    }
+    
+    func addHeader(name: String, value: String) -> Self {
+        headers[name] = value
+        return self
+    }
+    
+    func addCredential(credential: NSURLCredential) -> Self {
+        self.credential = credential
+        return self
+    }
+
+    func execute() -> Promise<Response<T>> {
+        if let credential = self.credential {
+            request.authenticate(usingCredential: credential)
+        }
+        if !headers.isEmpty {
+            Alamofire.Manager.sharedInstance.session.configuration.HTTPAdditionalHeaders = headers.map { ($0, $1) }
+        }
+        
+        let defer = Promise<Response<T>>.defer()
+        request.responseJSON(options: .AllowFragments) { (req, res, json, error) in
+            if let error = error {
+                defer.reject(error)
+                return
+            }
+            if res!.statusCode >= 400 {
+                //TODO: Add error entity
+                let error = NSError(domain: res!.URL!.URLString, code: res!.statusCode, userInfo: [:])
+                defer.reject(error)
+                return
+            }
+            
+            if Empty.instance is T {
+                let response = Response(response: res!, body: Empty.instance as! T)
+                defer.fulfill(response)
+                return
+            }
+            if let json: AnyObject = json {
+                if let body = T.decode(json) {
+                    let response = Response(response: res!, body: body)
+                    defer.fulfill(response)
+                } else {
+                    defer.reject(NSError(domain: "localhost", code: 500, userInfo: ["reason": "cannot convertible: \(json)"]))
+                }
+                return
+            }
+            
+            defer.reject(NSError(domain: "localhost", code: 500, userInfo: ["reason": "unreacheable code"]))
+        }
+        return defer.promise
+    }
+}
 
