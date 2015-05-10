@@ -28,8 +28,8 @@ class RequestBuilder<T: JSONDecodable> {
         return self
     }
     
-    func addCredential(credential: NSURLCredential) -> Self {
-        self.credential = credential
+    func addCredential() -> Self {
+        self.credential = {{projectName}}API.credential
         return self
     }
 
