@@ -36,17 +36,22 @@ final class RangedArray<Entity: JSONDecodable>: JSONDecodable {
 
 class Response<T: JSONDecodable> {
     let statusCode: Int
-    let header: [NSObject: AnyObject]
+    let header: [String: String]
     let body: T
 
-    init(statusCode: Int, header: [NSObject: AnyObject], body: T) {
+    init(statusCode: Int, header: [String: String], body: T) {
         self.statusCode = statusCode
         self.header = header
         self.body = body
     }
 
     convenience init(response: NSHTTPURLResponse, body: T) {
-        self.init(statusCode: response.statusCode, header: response.allHeaderFields, body: body)
+        let rawHeader = response.allHeaderFields
+        var header = [String:String]()
+        for (key, value) in rawHeader {
+            header[key as! String] = value as? String
+        }
+        self.init(statusCode: response.statusCode, header: header, body: body)
     }
 }
 
