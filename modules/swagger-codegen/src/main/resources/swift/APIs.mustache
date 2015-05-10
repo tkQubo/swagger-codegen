@@ -23,7 +23,7 @@ class RequestBuilder<T: JSONDecodable> {
         self.request = request
     }
     
-    func addHeader(name: String, value: String) -> Self {
+    func addHeader(#name: String, value: String) -> Self {
         headers[name] = value
         return self
     }
