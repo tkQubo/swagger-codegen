@@ -8,7 +8,7 @@ import Alamofire
 import PromiseKit
 
 class {{projectName}}API {
-    static let basePath = "{{basePath}}"
+    static let basePath = "{{^basePathOverride}}{{basePath}}{{/basePathOverride}}{{basePathOverride}}"
     static var credential: NSURLCredential?
     class APIBase {
     }

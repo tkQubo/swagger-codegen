@@ -40,12 +40,19 @@ public class SwiftGenerator extends DefaultCodegen implements CodegenConfig {
     apiPackage = "/APIs";
     modelPackage = "/Models";
 
-    // from ObjcClientCodegen.java
+    // Inject application name
     String appName = System.getProperty("appName");
     if (appName == null) {
-      appName = "swaggerClient";
+      appName = "SwaggerClient";
     }
     additionalProperties.put("projectName", appName);
+
+    // Inject base url override
+    String basePathOverride = System.getProperty("basePathOverride");
+    if (basePathOverride != null) {
+      additionalProperties.put("basePathOverride", basePathOverride);
+    }
+
     sourceFolder = appName + "/" + sourceFolder;
 
 //    supportingFiles.add(new SupportingFile("Podfile.mustache", "", "Podfile"));
