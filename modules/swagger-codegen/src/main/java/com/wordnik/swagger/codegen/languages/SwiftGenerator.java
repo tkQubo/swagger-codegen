@@ -14,9 +14,11 @@ import org.apache.commons.lang.StringUtils;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.io.File;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class SwiftGenerator extends DefaultCodegen implements CodegenConfig {
-  public static final String NON_NAME_ELEMENT = "[-_:;#]";
+  private static final Pattern PATH_PARAM_PATTERN = Pattern.compile("\\{[a-zA-Z_]+\\}");
   protected String sourceFolder = "Classes/Swaggers";
 
   public CodegenType getTag() {
@@ -205,6 +207,7 @@ public class SwiftGenerator extends DefaultCodegen implements CodegenConfig {
 
   @Override
   public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, Map<String, Model> definitions) {
+    path = normalizePath(path);
     List<Parameter> parameters = operation.getParameters();
     parameters = Lists.newArrayList(Iterators.filter(parameters.iterator(), new Predicate<Parameter>() {
       @Override
@@ -214,5 +217,32 @@ public class SwiftGenerator extends DefaultCodegen implements CodegenConfig {
     }));
     operation.setParameters(parameters);
     return super.fromOperation(path, httpMethod, operation, definitions);
+  }
+
+  private static String normalizePath(String path) {
+    StringBuilder builder = new StringBuilder();
+
+    int cursor = 0;
+    Matcher matcher = PATH_PARAM_PATTERN.matcher(path);
+    boolean found = matcher.find();
+    while (found) {
+      String stringBeforeMatch = path.substring(cursor, matcher.start());
+      builder.append(stringBeforeMatch);
+
+      String group = matcher.group().substring(1, matcher.group().length() - 1);
+      group = camelize(group, true);
+      builder
+              .append("{")
+              .append(group)
+              .append("}");
+
+      cursor = matcher.end();
+      found = matcher.find();
+    }
+
+    String stringAfterMatch = path.substring(cursor);
+    builder.append(stringAfterMatch);
+
+    return builder.toString();
   }
 }
