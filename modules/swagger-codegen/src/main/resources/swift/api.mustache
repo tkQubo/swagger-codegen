@@ -41,7 +41,7 @@ extension {{projectName}}API {
             ]{{/hasMore}}{{/queryParams}}
             let parameters = APIHelper.rejectNil(nillableParameters){{/bodyParam}}
 
-            return RequestBuilder(method: "{{httpMethod}}", URLString: url, parameters: parameters, isBody: {{^queryParams}}true{{/queryParams}}{{#queryParams}}{{^secondaryParam}}false{{/secondaryParam}}{{/queryParams}})
+            return {{projectName}}API.requestBuilderFactory.getBuilder()(method: "{{httpMethod}}", URLString: url, parameters: parameters, isBody: {{^queryParams}}true{{/queryParams}}{{#queryParams}}{{^secondaryParam}}false{{/secondaryParam}}{{/queryParams}})
         }
     {{/operation}}
     }

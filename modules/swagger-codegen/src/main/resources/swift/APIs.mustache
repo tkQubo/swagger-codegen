@@ -4,30 +4,33 @@
 // https://github.com/swagger-api/swagger-codegen
 //
 
-import Alamofire
 import PromiseKit
 
 class {{projectName}}API {
     static let basePath = "{{^basePathOverride}}{{basePath}}{{/basePathOverride}}{{basePathOverride}}"
     static var credential: NSURLCredential?
+    static var requestBuilderFactory: RequestBuilderFactory = AlamofireRequestBuilderFactory()
+
     class APIBase {
     }
 }
 
 class RequestBuilder<T: JSONDecodable> {
-    private var credential: NSURLCredential?
-    private var headers: [String:String] = [:]
-    private let parameters: [String:AnyObject]?
-    private let isBody: Bool
-    private let method: String
-    private let URLString: URLStringConvertible
-
-    internal init(method: String, URLString: URLStringConvertible, parameters: [String:AnyObject]?, isBody: Bool) {
+    var credential: NSURLCredential?
+    var headers: [String:String] = [:]
+    let parameters: [String:AnyObject]?
+    let isBody: Bool
+    let method: String
+    let URLString: URLStringConvertible
+    
+    required init(method: String, URLString: URLStringConvertible, parameters: [String:AnyObject]?, isBody: Bool) {
         self.method = method
         self.URLString = URLString
         self.parameters = parameters
         self.isBody = isBody
     }
+    
+    func execute() -> Promise<Response<T>>  { fatalError("Not implemented") }
 
     func addHeader(#name: String, value: String) -> Self {
         if !value.isEmpty {
@@ -37,59 +40,12 @@ class RequestBuilder<T: JSONDecodable> {
     }
     
     func addCredential() -> Self {
-        self.credential = {{projectName}}API.credential
+        self.credential = OneteamAPI.credential
         return self
     }
+}
 
-    func execute() -> Promise<Response<T>> {
-        let configuration: NSURLSessionConfiguration = NSURLSessionConfiguration.defaultSessionConfiguration()
-        configuration.HTTPAdditionalHeaders = buildHeaders()
-        let manager = Alamofire.Manager(configuration: configuration)
-        let encoding = isBody ? Alamofire.ParameterEncoding.JSON : Alamofire.ParameterEncoding.URL
-        let request = manager.request(Alamofire.Method(rawValue: method)!, URLString, parameters: parameters, encoding: encoding)
-        if let credential = self.credential {
-            request.authenticate(usingCredential: credential)
-        }
-
-        let defer = Promise<Response<T>>.defer()
-        request.responseJSON(options: .AllowFragments) { (req, res, json, error) in
-            if let error = error {
-                defer.reject(error)
-                return
-            }
-            if res!.statusCode >= 400 {
-                //TODO: Add error entity
-                let error = NSError(domain: res!.URL!.URLString, code: res!.statusCode, userInfo: [:])
-                defer.reject(error)
-                return
-            }
-            
-            if Empty.instance is T {
-                let response = Response(response: res!, body: Empty.instance as! T)
-                defer.fulfill(response)
-                return
-            }
-            if let json: AnyObject = json {
-                if let body = T.decode(json) {
-                    let response = Response(response: res!, body: body)
-                    defer.fulfill(response)
-                } else {
-                    defer.reject(NSError(domain: "localhost", code: 500, userInfo: ["reason": "cannot convertible: \(json)"]))
-                }
-                return
-            }
-            
-            defer.reject(NSError(domain: "localhost", code: 500, userInfo: ["reason": "unreacheable code"]))
-        }
-        return defer.promise
-    }
-
-    private func buildHeaders() -> [String: AnyObject] {
-        var httpHeaders = Manager.defaultHTTPHeaders
-        for (key, value) in self.headers {
-            httpHeaders[key] = value
-        }
-        return httpHeaders
-    }
+protocol RequestBuilderFactory {
+    func getBuilder<T: JSONDecodable>() -> RequestBuilder<T>.Type
 }
 
