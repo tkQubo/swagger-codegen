@@ -15,25 +15,6 @@ protocol JSONEncodable {
     func encode() -> AnyObject
 }
 
-final class RangedArray<Entity: JSONDecodable>: JSONDecodable {
-    var total: Int?
-    var offset: Int?
-    var limit: Int?
-    var items: [Entity]!
-
-    static func decode(source: AnyObject) -> RangedArray? {
-        let json = JSON(source)
-        let instance = RangedArray()
-        instance.total = json["total"].int
-        instance.offset = json["offset"].int
-        instance.limit = json["limit"].int
-        let rawItems = json["items"].arrayObject!
-        let nullableItems = rawItems.map(Entity.decode)
-        instance.items = nullableItems.filter({ $0 != nil }).map({ $0! })
-        return instance
-    }
-}
-
 class Response<T: JSONDecodable> {
     let statusCode: Int
     let header: [String: String]
