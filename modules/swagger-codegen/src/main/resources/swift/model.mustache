@@ -33,12 +33,13 @@ extension {{projectName}}API {
 
         // MARK: JSONEncodable
         func encode() -> AnyObject {
-            var nullableDictionary = [String:AnyObject?](){{#vars}}{{#isNotContainer}}{{#isPrimitiveType}}{{^isEnum}}
-            nullableDictionary["{{name}}"] = self.{{name}}{{/isEnum}}{{/isPrimitiveType}}{{#isEnum}}
-            nullableDictionary["{{name}}"] = self.{{name}}{{^required}}?{{/required}}.rawValue{{/isEnum}}{{^isPrimitiveType}}
-            nullableDictionary["{{name}}"] = self.{{name}}{{^required}}?{{/required}}.encode(){{/isPrimitiveType}}{{/isNotContainer}}{{#isContainer}}
-            nullableDictionary["{{name}}"] = self.{{name}}{{^required}}?{{/required}}.encode(){{/isContainer}}{{/vars}}
-            return APIHelper.rejectNil(nullableDictionary)
+            var nillableDictionary = [String:AnyObject?](){{#vars}}{{#isNotContainer}}{{#isPrimitiveType}}{{^isEnum}}
+            nillableDictionary["{{name}}"] = self.{{name}}{{/isEnum}}{{/isPrimitiveType}}{{#isEnum}}
+            nillableDictionary["{{name}}"] = self.{{name}}{{^required}}?{{/required}}.rawValue{{/isEnum}}{{^isPrimitiveType}}
+            nillableDictionary["{{name}}"] = self.{{name}}{{^required}}?{{/required}}.encode(){{/isPrimitiveType}}{{/isNotContainer}}{{#isContainer}}
+            nillableDictionary["{{name}}"] = self.{{name}}{{^required}}?{{/required}}.encode(){{/isContainer}}{{/vars}}
+            let dictionary: [String:AnyObject] = APIHelper.rejectNil(nillableDictionary) ?? [:]
+            return dictionary
         }
     }{{/model}}
 }
