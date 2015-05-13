@@ -17,14 +17,22 @@ class {{projectName}}API {
 class RequestBuilder<T: JSONDecodable> {
     private var credential: NSURLCredential?
     private var headers: [String:String] = [:]
-    private let request: Request
-    
-    internal init(request: Request) {
-        self.request = request
+    private let parameters: [String:AnyObject]?
+    private let isBody: Bool
+    private let method: String
+    private let URLString: URLStringConvertible
+
+    internal init(method: String, URLString: URLStringConvertible, parameters: [String:AnyObject]?, isBody: Bool) {
+        self.method = method
+        self.URLString = URLString
+        self.parameters = parameters
+        self.isBody = isBody
     }
-    
+
     func addHeader(#name: String, value: String) -> Self {
-        headers[name] = value
+        if !value.isEmpty {
+            headers[name] = value
+        }
         return self
     }
     
@@ -34,13 +42,15 @@ class RequestBuilder<T: JSONDecodable> {
     }
 
     func execute() -> Promise<Response<T>> {
+        let configuration: NSURLSessionConfiguration = NSURLSessionConfiguration.defaultSessionConfiguration()
+        configuration.HTTPAdditionalHeaders = buildHeaders()
+        let manager = Alamofire.Manager(configuration: configuration)
+        let encoding = isBody ? Alamofire.ParameterEncoding.JSON : Alamofire.ParameterEncoding.URL
+        let request = manager.request(Alamofire.Method(rawValue: method)!, URLString, parameters: parameters, encoding: encoding)
         if let credential = self.credential {
             request.authenticate(usingCredential: credential)
         }
-        if !headers.isEmpty {
-            Alamofire.Manager.sharedInstance.session.configuration.HTTPAdditionalHeaders = headers.map { ($0, $1) }
-        }
-        
+
         let defer = Promise<Response<T>>.defer()
         request.responseJSON(options: .AllowFragments) { (req, res, json, error) in
             if let error = error {
@@ -72,6 +82,14 @@ class RequestBuilder<T: JSONDecodable> {
             defer.reject(NSError(domain: "localhost", code: 500, userInfo: ["reason": "unreacheable code"]))
         }
         return defer.promise
+    }
+
+    private func buildHeaders() -> [String: AnyObject] {
+        var httpHeaders = Manager.defaultHTTPHeaders
+        for (key, value) in self.headers {
+            httpHeaders[key] = value
+        }
+        return httpHeaders
     }
 }
 

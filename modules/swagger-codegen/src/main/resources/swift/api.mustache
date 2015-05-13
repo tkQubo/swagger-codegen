@@ -41,9 +41,7 @@ extension {{projectName}}API {
             ]{{/hasMore}}{{/queryParams}}
             let parameters = APIHelper.rejectNil(nillableParameters){{/bodyParam}}
 
-            let request = Alamofire.request(.{{httpMethod}}, url, parameters: parameters, encoding: {{#bodyParam}}.JSON{{/bodyParam}}{{^bodyParam}}.URL{{/bodyParam}})
-
-            return RequestBuilder(request: request)
+            return RequestBuilder(method: "{{httpMethod}}", URLString: url, parameters: parameters, isBody: {{^queryParams}}true{{/queryParams}}{{#queryParams}}{{^secondaryParam}}false{{/secondaryParam}}{{/queryParams}})
         }
     {{/operation}}
     }
