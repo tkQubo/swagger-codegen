@@ -55,6 +55,12 @@ public class SwiftGenerator extends DefaultCodegen implements CodegenConfig {
       additionalProperties.put("basePathOverride", basePathOverride);
     }
 
+    // Make all the variable optional
+    String suppressRequired = System.getProperty("suppressRequired");
+    if (suppressRequired != null) {
+      additionalProperties.put("suppressRequired", suppressRequired);
+    }
+
     sourceFolder = appName + "/" + sourceFolder;
 
     supportingFiles.add(new SupportingFile("Cartfile.mustache", "", "Cartfile"));
